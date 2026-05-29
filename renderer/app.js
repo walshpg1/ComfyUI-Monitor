@@ -7,6 +7,7 @@ const state = {
   elapsedTimer: null,
   stage: 1,
   prevStagePct: 0,
+  stage2Start: null,
   errorCards: new Map()
 };
 
@@ -83,7 +84,7 @@ function updateStage2(step, total) {
   stage2Section.className = 'stage2-section stage2-section--active';
   stage2Bar.className = 'progress-bar';
   const pct = total > 0 ? Math.round((step / total) * 100) : 0;
-  const elapsed = state.runStart ? (Date.now() - state.runStart) / 1000 : 0;
+  const elapsed = state.stage2Start ? (Date.now() - state.stage2Start) / 1000 : 0;
   stage2Bar.style.width = `${pct}%`;
   stage2Pct.textContent = `${pct}%`;
   stage2Eta.textContent = etaStr(elapsed, step, total);
@@ -162,6 +163,7 @@ api.onEvent((channel, data) => {
       stage2Eta.textContent = '';
       state.stage = 1;
       state.prevStagePct = 0;
+      state.stage2Start = null;
       setStatus('Running', 'running');
       startElapsed();
       break;
@@ -170,6 +172,7 @@ api.onEvent((channel, data) => {
       // Detect stage 2: step resets to a low number after stage 1 was well advanced
       if (data.step <= 2 && state.stage === 1 && state.prevStagePct > 80) {
         state.stage = 2;
+        state.stage2Start = Date.now();
       }
       if (state.stage === 2) {
         updateStage2(data.step, data.total);
