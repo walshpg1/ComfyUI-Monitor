@@ -1,0 +1,26 @@
+{
+  "name": "comfyui-monitor",
+  "version": "1.0.0",
+  "description": "ComfyUI live monitor with AI error explanations",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ]
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "dotenv": "^16.4.5",
+    "uuid": "^9.0.1",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "jest": "^29.7.0"
+  }
+}
