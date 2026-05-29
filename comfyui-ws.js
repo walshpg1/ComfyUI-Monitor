@@ -1,4 +1,5 @@
 const WebSocket = require('ws');
+const { v4: uuidv4 } = require('uuid');
 
 function parseMessage(raw) {
   let msg;
@@ -46,9 +47,11 @@ function connectToComfyUI(wsUrl, onEvent) {
   let ws;
   let reconnectTimer;
   let closed = false;
+  const clientId = uuidv4();
+  const urlWithClient = `${wsUrl}?clientId=${clientId}`;
 
   function connect() {
-    ws = new WebSocket(wsUrl);
+    ws = new WebSocket(urlWithClient);
 
     ws.on('open', () => onEvent({ type: 'connected' }));
 
