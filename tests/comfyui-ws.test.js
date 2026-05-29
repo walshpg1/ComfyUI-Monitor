@@ -73,3 +73,13 @@ test('invalid JSON returns null', () => {
   const result = parseMessage('not json {{{');
   expect(result).toBeNull();
 });
+
+test('missing data property returns null', () => {
+  const result = parseMessage(JSON.stringify({ type: 'execution_start' }));
+  expect(result).toBeNull();
+});
+
+test('null data returns null', () => {
+  const result = parseMessage(JSON.stringify({ type: 'execution_start', data: null }));
+  expect(result).toBeNull();
+});

@@ -6,6 +6,8 @@ function parseMessage(raw) {
 
   const { type, data } = msg;
 
+  if (!data || typeof data !== 'object') return null;
+
   switch (type) {
     case 'status':
       return { type: 'status' };
@@ -32,6 +34,7 @@ function parseMessage(raw) {
 
     case 'executing':
       if (data.node === null) return { type: 'run-complete', promptId: data.prompt_id };
+      // Non-null node means a specific node is executing (mid-run), not a completion signal
       return null;
 
     default:
