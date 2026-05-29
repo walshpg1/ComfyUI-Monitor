@@ -35,7 +35,7 @@ Edit `.env` in the project root:
 
 ```
 ANTHROPIC_API_KEY=sk-ant-your-key-here
-COMFYUI_WS_URL=ws://localhost:8188/ws
+COMFYUI_WS_URL=ws://127.0.0.1:8188/ws
 ```
 
 If `ANTHROPIC_API_KEY` is missing or empty, error cards will show "Add ANTHROPIC_API_KEY to .env to enable AI explanations" instead of a Claude response. Everything else still works.

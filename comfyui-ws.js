@@ -51,6 +51,7 @@ function connectToComfyUI(wsUrl, onEvent) {
   const urlWithClient = `${wsUrl}?clientId=${clientId}`;
 
   function connect() {
+    console.log('[ws] connecting to', urlWithClient);
     ws = new WebSocket(urlWithClient);
 
     ws.on('open', () => onEvent({ type: 'connected' }));
@@ -66,8 +67,8 @@ function connectToComfyUI(wsUrl, onEvent) {
       reconnectTimer = setTimeout(connect, 3000);
     });
 
-    ws.on('error', () => {
-      // close event fires after error — reconnect handled there
+    ws.on('error', (err) => {
+      console.error('[ws] error:', err.message);
     });
   }
 

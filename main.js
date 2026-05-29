@@ -5,7 +5,7 @@ const { connectToComfyUI } = require('./comfyui-ws');
 const { explainError } = require('./ai-explainer');
 const store = require('./store');
 
-const WS_URL   = process.env.COMFYUI_WS_URL || 'ws://localhost:8188/ws';
+const WS_URL   = process.env.COMFYUI_WS_URL || 'ws://127.0.0.1:8188/ws';
 const API_KEY  = process.env.ANTHROPIC_API_KEY || null;
 
 let mainWindow;
@@ -50,14 +50,17 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  mainWindow.webContents.openDevTools({ mode: 'detach' });
 
   mainWindow.webContents.once('did-finish-load', () => {
+    console.log('[main] did-finish-load fired');
     const history = store.loadHistory();
     send('comfyui:history', { entries: history });
 
     connection = connectToComfyUI(WS_URL, (event) => {
       switch (event.type) {
         case 'connected':
+          console.log('[main] WS connected, sending to renderer');
           send('comfyui:connected', { url: WS_URL });
           break;
         case 'disconnected':
