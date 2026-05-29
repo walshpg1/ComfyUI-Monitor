@@ -73,7 +73,9 @@ function createWindow() {
           send('comfyui:run-complete', {});
           break;
         case 'error':
-          handleError(event);
+          handleError(event).catch(err => {
+            send('comfyui:explanation-chunk', { id: null, chunk: `Unhandled error: ${err.message}` });
+          });
           break;
       }
     });
