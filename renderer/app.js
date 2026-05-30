@@ -224,3 +224,20 @@ btnClear.addEventListener('click', () => {
   state.sessionErrors = 0;
   statErrors.textContent = '0';
 });
+
+// ── Tab switching ──────────────────────────────────────────────────────────
+const tabMonitor  = el('tab-monitor');
+const tabTools    = el('tab-tools');
+const monitorView = el('monitor-view');
+const toolsPanel  = el('tools-panel');
+
+function showTab(name) {
+  const isMonitor = name === 'monitor';
+  monitorView.hidden = !isMonitor;
+  toolsPanel.hidden  = isMonitor;
+  tabMonitor.className = `tab-btn${isMonitor ? ' tab-btn--active' : ''}`;
+  tabTools.className   = `tab-btn${!isMonitor ? ' tab-btn--active' : ''}`;
+}
+
+tabMonitor.addEventListener('click', () => showTab('monitor'));
+tabTools.addEventListener('click',   () => showTab('tools'));

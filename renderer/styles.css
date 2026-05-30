@@ -257,3 +257,42 @@ body {
 .btn-link:hover { text-decoration: underline; }
 
 .divider { color: var(--text-muted); font-size: 9px; }
+
+/* Tab bar */
+#tab-bar {
+  margin-left: auto;
+  display: flex;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 10px 2px;
+  transition: color 0.15s;
+}
+
+.tab-btn:hover { color: var(--text); }
+
+.tab-btn--active {
+  color: var(--cyan);
+  border-bottom-color: var(--cyan);
+}
+
+/* Tools panel */
+#tools-panel {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  min-height: 0;
+}
+
+#monitor-view {
+  display: contents;
+}

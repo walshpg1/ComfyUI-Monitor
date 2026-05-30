@@ -14,57 +14,67 @@
       <span class="app-name">ComfyUI Monitor</span>
       <span id="conn-label" class="conn-label">Disconnected</span>
     </div>
+    <div id="tab-bar">
+      <button id="tab-monitor" class="tab-btn tab-btn--active">Monitor</button>
+      <button id="tab-tools" class="tab-btn">Tools</button>
+    </div>
   </header>
 
-  <section id="stats-row">
-    <div class="stat-tile">
-      <div id="stat-status" class="stat-value stat-value--disconnected">Disconnected</div>
-      <div class="stat-label">Status</div>
-    </div>
-    <div class="stat-tile">
-      <div id="stat-completed" class="stat-value stat-value--green">0</div>
-      <div class="stat-label">Completed</div>
-    </div>
-    <div class="stat-tile">
-      <div id="stat-errors" class="stat-value stat-value--red">0</div>
-      <div class="stat-label">Errors</div>
-    </div>
-    <div class="stat-tile">
-      <div id="stat-elapsed" class="stat-value stat-value--yellow">--:--</div>
-      <div class="stat-label">Elapsed</div>
-    </div>
-  </section>
-
-  <main id="main-panel">
-    <section id="current-gen">
-      <div class="panel-title">Current Generation</div>
-      <div id="workflow-name" class="workflow-name">—</div>
-      <div id="stage1-label" class="stage-label">Idle</div>
-      <div class="progress-track">
-        <div id="stage1-bar" class="progress-bar" style="width:0%"></div>
+  <div id="monitor-view">
+    <section id="stats-row">
+      <div class="stat-tile">
+        <div id="stat-status" class="stat-value stat-value--disconnected">Disconnected</div>
+        <div class="stat-label">Status</div>
       </div>
-      <div class="progress-meta">
-        <span id="stage1-pct">0%</span>
-        <span id="stage1-eta"></span>
+      <div class="stat-tile">
+        <div id="stat-completed" class="stat-value stat-value--green">0</div>
+        <div class="stat-label">Completed</div>
       </div>
+      <div class="stat-tile">
+        <div id="stat-errors" class="stat-value stat-value--red">0</div>
+        <div class="stat-label">Errors</div>
+      </div>
+      <div class="stat-tile">
+        <div id="stat-elapsed" class="stat-value stat-value--yellow">--:--</div>
+        <div class="stat-label">Elapsed</div>
+      </div>
+    </section>
 
-      <div id="stage2-section" class="stage2-section stage2-section--waiting">
-        <div class="panel-title" style="margin-top:14px;">Stage 2 (Upscale)</div>
+    <main id="main-panel">
+      <section id="current-gen">
+        <div class="panel-title">Current Generation</div>
+        <div id="workflow-name" class="workflow-name">—</div>
+        <div id="stage1-label" class="stage-label">Idle</div>
         <div class="progress-track">
-          <div id="stage2-bar" class="progress-bar progress-bar--dim" style="width:0%"></div>
+          <div id="stage1-bar" class="progress-bar" style="width:0%"></div>
         </div>
-        <div id="stage2-meta" class="progress-meta">
-          <span id="stage2-pct">Waiting...</span>
-          <span id="stage2-eta"></span>
+        <div class="progress-meta">
+          <span id="stage1-pct">0%</span>
+          <span id="stage1-eta"></span>
         </div>
-      </div>
-    </section>
 
-    <section id="error-panel">
-      <div class="panel-title">Recent Errors</div>
-      <div id="error-list"></div>
-    </section>
-  </main>
+        <div id="stage2-section" class="stage2-section stage2-section--waiting">
+          <div class="panel-title" style="margin-top:14px;">Stage 2 (Upscale)</div>
+          <div class="progress-track">
+            <div id="stage2-bar" class="progress-bar progress-bar--dim" style="width:0%"></div>
+          </div>
+          <div id="stage2-meta" class="progress-meta">
+            <span id="stage2-pct">Waiting...</span>
+            <span id="stage2-eta"></span>
+          </div>
+        </div>
+      </section>
+
+      <section id="error-panel">
+        <div class="panel-title">Recent Errors</div>
+        <div id="error-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="tools-panel" hidden>
+    <!-- filled in Task 5 -->
+  </div>
 
   <footer id="bottom-bar">
     <span id="ws-status" class="ws-status-text">Disconnected</span>
