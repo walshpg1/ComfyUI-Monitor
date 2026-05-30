@@ -270,7 +270,15 @@ document.querySelectorAll('.btn-run').forEach(btn => {
     setToolsStatus('Running…', true);
     infoResult.hidden = true;
 
-    const result = await api.runTool(tool, args);
+    let result;
+    try {
+      result = await api.runTool(tool, args);
+    } catch (err) {
+      setToolsStatus(err.message || 'IPC error', false);
+      btn.disabled = false;
+      btn.classList.remove('btn-run--running');
+      return;
+    }
 
     btn.disabled = false;
     btn.classList.remove('btn-run--running');
