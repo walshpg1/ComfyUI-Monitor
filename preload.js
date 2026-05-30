@@ -18,5 +18,6 @@ contextBridge.exposeInMainWorld('comfyMonitor', {
     });
   },
   copyError:    () => ipcRenderer.invoke('copy-last-error'),
-  clearHistory: () => ipcRenderer.invoke('clear-history')
+  clearHistory: () => ipcRenderer.invoke('clear-history'),
+  runTool:      (tool, args) => ipcRenderer.invoke('tools:run', { tool, args }),
 });

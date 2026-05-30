@@ -1,9 +1,17 @@
 require('dotenv').config();
-const { app, BrowserWindow, ipcMain, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, clipboard, shell } = require('electron');
 const path = require('path');
 const { connectToComfyUI } = require('./comfyui-ws');
 const { explainError } = require('./ai-explainer');
 const store = require('./store');
+const {
+  findFfmpeg,
+  extractLastFrame, extractFirstFrame, extractFrameAtTime,
+  reverseVideo, boomerang, speed2x, slowMotion,
+  toGif, toWebp, recompress,
+  videoInfo, openInExplorer, copyPath,
+  FFMPEG_CANDIDATES,
+} = require('./ffmpeg-tools');
 
 const WS_URL   = process.env.COMFYUI_WS_URL || 'ws://127.0.0.1:8188/ws';
 const API_KEY  = process.env.ANTHROPIC_API_KEY || null;
@@ -11,6 +19,7 @@ const API_KEY  = process.env.ANTHROPIC_API_KEY || null;
 let mainWindow;
 let lastError  = null;
 let connection = null;
+let ffmpegPath = null;
 
 function send(channel, data) {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -91,6 +100,46 @@ function createWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+
+  findFfmpeg(FFMPEG_CANDIDATES)
+    .then(p => { ffmpegPath = p; })
+    .catch(() => { ffmpegPath = null; });
+
+  ipcMain.handle('tools:run', async (_event, { tool, args = {} }) => {
+    if (!ffmpegPath && !['open-folder', 'copy-path'].includes(tool)) {
+      return { ok: false, error: 'ffmpeg not found. Install ffmpeg or add to PATH.' };
+    }
+    try {
+      const videoPath = args.video || undefined;
+      switch (tool) {
+        case 'last-frame':    return await extractLastFrame(ffmpegPath, videoPath);
+        case 'first-frame':   return await extractFirstFrame(ffmpegPath, videoPath);
+        case 'frame-at-time': return await extractFrameAtTime(ffmpegPath, args.seconds, videoPath);
+        case 'reverse':       return await reverseVideo(ffmpegPath, videoPath);
+        case 'boomerang':     return await boomerang(ffmpegPath, videoPath);
+        case 'speed-2x':      return await speed2x(ffmpegPath, videoPath);
+        case 'slow':          return await slowMotion(ffmpegPath, videoPath);
+        case 'to-gif':        return await toGif(ffmpegPath, videoPath);
+        case 'to-webp':       return await toWebp(ffmpegPath, videoPath);
+        case 'recompress':    return await recompress(ffmpegPath, videoPath);
+        case 'info':          return await videoInfo(ffmpegPath, videoPath);
+        case 'open-folder': {
+          const dir = openInExplorer(videoPath);
+          shell.openPath(dir);
+          return { ok: true };
+        }
+        case 'copy-path': {
+          const p = copyPath(videoPath);
+          clipboard.writeText(p);
+          return { ok: true, path: p };
+        }
+        default:
+          return { ok: false, error: `Unknown tool: ${tool}` };
+      }
+    } catch (err) {
+      return { ok: false, error: err.message.slice(0, 200) };
+    }
+  });
 
   ipcMain.handle('copy-last-error', () => {
     if (lastError) clipboard.writeText(JSON.stringify(lastError, null, 2));
