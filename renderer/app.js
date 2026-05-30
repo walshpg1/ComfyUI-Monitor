@@ -241,3 +241,54 @@ function showTab(name) {
 
 tabMonitor.addEventListener('click', () => showTab('monitor'));
 tabTools.addEventListener('click',   () => showTab('tools'));
+
+// ── Tools panel ────────────────────────────────────────────────────────────
+const toolsStatus  = el('tools-status');
+const infoResult   = el('info-result');
+const inputSeconds = el('input-seconds');
+
+function setToolsStatus(msg, ok) {
+  toolsStatus.textContent = msg;
+  toolsStatus.className = `tools-status tools-status--${ok ? 'ok' : 'err'}`;
+}
+
+document.querySelectorAll('.btn-run').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const tool = btn.dataset.tool;
+    const args = {};
+    if (tool === 'frame-at-time') {
+      const secs = parseFloat(inputSeconds.value);
+      if (isNaN(secs) || secs < 0) {
+        setToolsStatus('Enter a valid number of seconds first.', false);
+        return;
+      }
+      args.seconds = secs;
+    }
+
+    btn.disabled = true;
+    btn.classList.add('btn-run--running');
+    setToolsStatus('Running…', true);
+    infoResult.hidden = true;
+
+    const result = await api.runTool(tool, args);
+
+    btn.disabled = false;
+    btn.classList.remove('btn-run--running');
+
+    if (result.ok) {
+      if (tool === 'info' && result.info) {
+        const { filename, resolution, fps, duration, codec, size } = result.info;
+        infoResult.textContent =
+          `${filename}\n${resolution} · ${fps}fps · ${duration}\n${codec} · ${size}`;
+        infoResult.hidden = false;
+        setToolsStatus('Info loaded.', true);
+      } else if (result.path) {
+        setToolsStatus(result.path, true);
+      } else {
+        setToolsStatus('Done.', true);
+      }
+    } else {
+      setToolsStatus(result.error || 'Unknown error', false);
+    }
+  });
+});

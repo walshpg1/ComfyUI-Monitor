@@ -73,7 +73,91 @@
   </div>
 
   <div id="tools-panel" hidden>
-    <!-- filled in Task 5 -->
+
+    <div class="tools-group-label">Frame Extraction</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">🖼</span><span class="tool-name">Last Frame</span></div>
+        <div class="tool-desc">Save final frame as PNG for I2V continuity</div>
+        <button class="btn-run" data-tool="last-frame">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">🖼</span><span class="tool-name">First Frame</span></div>
+        <div class="tool-desc">Save opening frame as PNG thumbnail</div>
+        <button class="btn-run" data-tool="first-frame">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">⏱</span><span class="tool-name">Frame at Time</span></div>
+        <div class="tool-desc">Extract frame at specific second</div>
+        <input class="tool-input" id="input-seconds" type="number" min="0" step="0.1" placeholder="seconds" />
+        <button class="btn-run" data-tool="frame-at-time">Run</button>
+      </div>
+    </div>
+
+    <div class="tools-group-label">Video Variants</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">⏪</span><span class="tool-name">Reverse</span></div>
+        <div class="tool-desc">Flip video backwards</div>
+        <button class="btn-run" data-tool="reverse">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">🔁</span><span class="tool-name">Boomerang</span></div>
+        <div class="tool-desc">Forward + reverse loop</div>
+        <button class="btn-run" data-tool="boomerang">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">⚡</span><span class="tool-name">Speed 2×</span></div>
+        <div class="tool-desc">Double playback speed</div>
+        <button class="btn-run" data-tool="speed-2x">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">🐌</span><span class="tool-name">Slow Motion</span></div>
+        <div class="tool-desc">Half speed (0.5×)</div>
+        <button class="btn-run" data-tool="slow">Run</button>
+      </div>
+    </div>
+
+    <div class="tools-group-label">Export</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">🎞</span><span class="tool-name">Export GIF</span></div>
+        <div class="tool-desc">Palette-optimised GIF, 480px wide</div>
+        <button class="btn-run" data-tool="to-gif">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">🌐</span><span class="tool-name">Export WebP</span></div>
+        <div class="tool-desc">Animated WebP, 480px wide</div>
+        <button class="btn-run" data-tool="to-webp">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">📦</span><span class="tool-name">Recompress</span></div>
+        <div class="tool-desc">H.264 CRF 23 — smaller file</div>
+        <button class="btn-run" data-tool="recompress">Run</button>
+      </div>
+    </div>
+
+    <div class="tools-group-label">Info &amp; Utility</div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">ℹ</span><span class="tool-name">Video Info</span></div>
+        <div class="tool-desc">Resolution, fps, duration, codec, size</div>
+        <button class="btn-run" data-tool="info">Run</button>
+        <div class="tool-info-result" id="info-result" hidden></div>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">📂</span><span class="tool-name">Open in Explorer</span></div>
+        <div class="tool-desc">Reveal renders folder in Windows Explorer</div>
+        <button class="btn-run" data-tool="open-folder">Run</button>
+      </div>
+      <div class="tool-card">
+        <div class="tool-header"><span class="tool-icon">📋</span><span class="tool-name">Copy Path</span></div>
+        <div class="tool-desc">Copy latest render path to clipboard</div>
+        <button class="btn-run" data-tool="copy-path">Run</button>
+      </div>
+    </div>
+
+    <div id="tools-status" class="tools-status"></div>
   </div>
 
   <footer id="bottom-bar">

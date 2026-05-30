@@ -296,3 +296,104 @@ body {
 #monitor-view {
   display: contents;
 }
+
+/* Tools card grid */
+.tools-group-label {
+  color: var(--yellow);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 12px 0 6px;
+}
+.tools-group-label:first-child { margin-top: 0; }
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.tool-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tool-icon { font-size: 12px; }
+
+.tool-name {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text);
+}
+
+.tool-desc {
+  font-size: 9px;
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.tool-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 10px;
+  font-family: inherit;
+  padding: 3px 6px;
+  width: 100%;
+}
+
+.btn-run {
+  background: var(--bg3);
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-size: 9px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 3px;
+  align-self: flex-end;
+  transition: background 0.15s;
+}
+.btn-run:hover    { background: rgba(78,205,196,0.1); }
+.btn-run:disabled { opacity: 0.4; cursor: default; }
+.btn-run--running::after { content: ' ···'; animation: spin 1s steps(3, end) infinite; }
+
+@keyframes spin {
+  0%   { content: ' ·  '; }
+  33%  { content: ' ·· '; }
+  66%  { content: ' ···'; }
+  100% { content: ' ·  '; }
+}
+
+.tool-info-result {
+  font-size: 9px;
+  color: var(--text-muted);
+  font-family: monospace;
+  margin-top: 2px;
+  line-height: 1.6;
+}
+
+/* Tools status bar */
+.tools-status {
+  margin-top: 10px;
+  font-size: 9px;
+  font-family: monospace;
+  padding: 4px 6px;
+  border-radius: 3px;
+  min-height: 20px;
+}
+.tools-status--ok  { color: var(--green); background: rgba(107,255,107,0.06); }
+.tools-status--err { color: var(--red);   background: rgba(255,107,107,0.06); }
