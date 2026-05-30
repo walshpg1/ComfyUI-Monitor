@@ -58,3 +58,40 @@ test('outputPath builds correct path for last-frame', () => {
   const result = tools.outputPath(video, 'D:\\frames', 'last_frame', '.png');
   expect(result).toBe(path.join('D:\\frames', 'LTX_Director_00010__last_frame.png'));
 });
+
+// ── Command output path tests (no ffmpeg needed) ────────────────────────────
+
+test('extractLastFrame builds correct output path', () => {
+  const video = 'D:\\renders\\LTX_Director_00010_.mp4';
+  const out = tools.outputPath(video, 'D:\\frames', 'last_frame', '.png');
+  expect(path.basename(out)).toBe('LTX_Director_00010__last_frame.png');
+});
+
+test('reverseVideo builds correct output path', () => {
+  const video = 'D:\\renders\\LTX_Director_00010_.mp4';
+  const out = tools.outputPath(video, 'D:\\processed', 'reversed', '.mp4');
+  expect(path.basename(out)).toBe('LTX_Director_00010__reversed.mp4');
+});
+
+test('toGif builds correct output path', () => {
+  const video = 'D:\\renders\\LTX_Director_00010_.mp4';
+  // GIF uses stem directly (no suffix)
+  const stem = path.basename(video, '.mp4');
+  const out = path.join('D:\\processed', `${stem}.gif`);
+  expect(path.basename(out)).toBe('LTX_Director_00010_.gif');
+});
+
+// ── execFfmpeg error propagation ────────────────────────────────────────────
+
+test('execFfmpeg rejects with stderr message on non-zero exit', async () => {
+  const { execFile } = require('child_process');
+  execFile.mockImplementation((cmd, args, cb) =>
+    cb(new Error('exit 1'), '', 'Invalid input file'));
+  await expect(tools.execFfmpeg('ffmpeg', ['-i', 'bad.mp4'])).rejects.toThrow('Invalid input file');
+});
+
+test('execFfmpeg resolves with stdout on success', async () => {
+  const { execFile } = require('child_process');
+  execFile.mockImplementation((cmd, args, cb) => cb(null, 'ok', ''));
+  await expect(tools.execFfmpeg('ffmpeg', [])).resolves.toBe('ok');
+});
