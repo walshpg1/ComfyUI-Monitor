@@ -17,10 +17,20 @@
     <div id="tab-bar">
       <button id="tab-monitor" class="tab-btn tab-btn--active">Monitor</button>
       <button id="tab-tools" class="tab-btn">Tools</button>
+      <button id="tab-jobs" class="tab-btn">Jobs</button>
+      <button id="tab-submit" class="tab-btn">Submit</button>
     </div>
   </header>
 
   <div id="monitor-view">
+<div id="monitor-layout">
+<aside id="job-queue-sidebar">
+  <div class="sidebar-heading">Processing</div>
+  <div id="job-processing-list"><div class="sidebar-empty">No active jobs</div></div>
+  <div class="sidebar-heading sidebar-heading--secondary">Recently Completed</div>
+  <div id="job-completed-list"></div>
+</aside>
+<div id="monitor-main">
     <section id="stats-row">
       <div class="stat-tile">
         <div id="stat-status" class="stat-value stat-value--disconnected">Disconnected</div>
@@ -70,6 +80,94 @@
         <div id="error-list"></div>
       </section>
     </main>
+
+    <section id="latest-render">
+      <div class="panel-title">Latest Render</div>
+      <div id="render-empty" class="render-empty">Watching video_raw\ — no renders yet</div>
+      <div id="render-row" hidden>
+        <div class="render-thumb" id="render-thumb">&#127916;</div>
+        <div class="render-info">
+          <div id="render-filename" class="render-filename"></div>
+          <div id="render-meta" class="render-meta"></div>
+        </div>
+        <div class="render-actions">
+          <button class="btn-render-tool" data-tool="reverse">Reverse</button>
+          <button class="btn-render-tool" data-tool="boomerang">Boomerang</button>
+          <button class="btn-render-tool" data-tool="to-gif">GIF</button>
+          <button class="btn-render-tool" data-tool="speed-2x">2×</button>
+        </div>
+      </div>
+      <div id="render-tool-status" class="render-tool-status"></div>
+    </section>
+
+    </div><!-- end monitor-main -->
+    </div><!-- end monitor-layout -->
+  </div><!-- end monitor-view -->
+
+  <div id="jobs-panel" hidden>
+  <div class="jobs-panel-content">
+    <div class="sidebar-heading">Processing</div>
+    <div id="jobs-panel-processing"><div class="sidebar-empty">No active jobs</div></div>
+    <div class="sidebar-heading sidebar-heading--secondary">Completed</div>
+    <div id="jobs-panel-completed"></div>
+    <div class="sidebar-heading sidebar-heading--secondary">Failed</div>
+    <div id="jobs-panel-failed"></div>
+  </div>
+</div>
+
+  <div id="submit-panel" hidden>
+    <div class="submit-form">
+      <div class="submit-section-title">NEW JOB</div>
+
+      <div class="submit-section">
+        <div class="submit-label">AVATAR</div>
+        <div class="avatar-row">
+          <div class="avatar-thumb" id="avatar-thumb">👤</div>
+          <div class="avatar-file-area">
+            <div class="avatar-filename-row">
+              <span id="avatar-filename" class="avatar-filename">No file selected</span>
+              <button id="btn-avatar-browse" class="btn-browse">Browse…</button>
+            </div>
+            <span class="submit-hint">From Pipeline\assets\avatars\</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-section">
+        <div class="submit-label">AUDIO <span class="submit-hint" style="display:inline">— staging\audio_ready\</span></div>
+        <div id="audio-list" class="audio-list">
+          <div class="audio-empty">Loading…</div>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <div class="submit-section submit-section--flex">
+          <div class="submit-label">WORKFLOW</div>
+          <select id="workflow-select" class="workflow-select">
+            <option value="LTX_FFLF_Audio">LTX_FFLF_Audio</option>
+            <option value="LTX_2Stage">LTX_2Stage</option>
+            <option value="LTX_3Stage">LTX_3Stage</option>
+            <option value="FLOAT">FLOAT</option>
+          </select>
+          <span id="workflow-hint" class="submit-hint">~12–15 min</span>
+        </div>
+        <div class="submit-section submit-section--platform">
+          <div class="submit-label">PLATFORM</div>
+          <div class="platform-toggle">
+            <button class="platform-btn platform-btn--active" data-platform="tiktok">TT</button>
+            <button class="platform-btn" data-platform="reels">IG</button>
+            <button class="platform-btn" data-platform="shorts">YT</button>
+          </div>
+          <span class="submit-hint">tiktok / reels / shorts</span>
+        </div>
+      </div>
+
+      <button id="btn-submit-job" class="btn-submit" disabled>&#9654; Queue Job</button>
+      <div id="submit-toast" class="submit-toast" hidden>
+        <span class="toast-icon">✓</span>
+        <span id="toast-msg" class="toast-msg">Job queued — n8n will pick it up within 10 seconds</span>
+      </div>
+    </div>
   </div>
 
   <div id="tools-panel" hidden>
