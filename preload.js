@@ -8,7 +8,9 @@ const CHANNELS = [
   'comfyui:run-complete',
   'comfyui:error',
   'comfyui:explanation-chunk',
-  'comfyui:history'
+  'comfyui:history',
+  'pipeline:jobs-update',
+  'pipeline:render-ready',
 ];
 
 contextBridge.exposeInMainWorld('comfyMonitor', {
@@ -17,7 +19,10 @@ contextBridge.exposeInMainWorld('comfyMonitor', {
       ipcRenderer.on(ch, (_event, data) => callback(ch, data));
     });
   },
-  copyError:    () => ipcRenderer.invoke('copy-last-error'),
-  clearHistory: () => ipcRenderer.invoke('clear-history'),
-  runTool:      (tool, args) => ipcRenderer.invoke('tools:run', { tool, args }),
+  copyError:        () => ipcRenderer.invoke('copy-last-error'),
+  clearHistory:     () => ipcRenderer.invoke('clear-history'),
+  runTool:          (tool, args) => ipcRenderer.invoke('tools:run', { tool, args }),
+  listAudio:        ()           => ipcRenderer.invoke('pipeline:list-audio'),
+  openAvatarDialog: ()           => ipcRenderer.invoke('pipeline:open-avatar-dialog'),
+  submitJob:        (job)        => ipcRenderer.invoke('pipeline:submit-job', job),
 });
