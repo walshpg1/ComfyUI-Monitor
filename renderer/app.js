@@ -334,7 +334,13 @@ function showTab(name) {
   tabTools.className   = `tab-btn${isTools   ? ' tab-btn--active' : ''}`;
   tabJobs.className    = `tab-btn${isJobs    ? ' tab-btn--active' : ''}`;
   tabSubmit.className  = `tab-btn${isSubmit  ? ' tab-btn--active' : ''}`;
-  if (isSubmit) loadAudioList();
+  if (isSubmit) loadAudioList().catch(err => {
+    audioList.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'audio-empty';
+    div.textContent = `Error: ${err.message}`;
+    audioList.appendChild(div);
+  });
 }
 
 tabMonitor.addEventListener('click', () => showTab('monitor'));
@@ -437,6 +443,7 @@ const workflowHint    = el('workflow-hint');
 const btnSubmitJob    = el('btn-submit-job');
 const submitToast     = el('submit-toast');
 const toastMsg        = el('toast-msg');
+const toastIcon       = el('toast-icon');
 
 const submitState = {
   avatarPath: null,
@@ -525,9 +532,11 @@ btnSubmitJob.addEventListener('click', async () => {
   btnSubmitJob.disabled = false;
 
   if (result.ok) {
+    toastIcon.textContent = '✓';
     toastMsg.textContent = 'Job queued — n8n will pick it up within 10 seconds';
     submitToast.className = 'submit-toast';
   } else {
+    toastIcon.textContent = '✗';
     toastMsg.textContent = `Error: ${result.error}`;
     submitToast.className = 'submit-toast submit-toast--error';
   }
