@@ -1,5 +1,6 @@
 require('dotenv').config();
-const { app, BrowserWindow, ipcMain, clipboard, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, clipboard, shell, dialog } = require('electron');
+const fs = require('fs');
 const path = require('path');
 const { connectToComfyUI } = require('./comfyui-ws');
 const { explainError } = require('./ai-explainer');
@@ -12,13 +13,19 @@ const {
   videoInfo, openInExplorer, copyPath,
   FFMPEG_CANDIDATES,
 } = require('./ffmpeg-tools');
+const { startPipelineWatch } = require('./pipeline');
 
 const WS_URL   = process.env.COMFYUI_WS_URL || 'ws://127.0.0.1:8188/ws';
 const API_KEY  = process.env.ANTHROPIC_API_KEY || null;
 
+const PIPELINE_AUDIO_DIR = 'D:\\AIStudio\\Pipeline\\staging\\audio_ready';
+const PIPELINE_AVATAR_DIR = 'D:\\AIStudio\\Pipeline\\assets\\avatars';
+const PIPELINE_INBOX      = 'D:\\AIStudio\\Pipeline\\inbox\\job.json';
+
 let mainWindow;
 let lastError  = null;
 let connection = null;
+let pipelineWatcher = null;
 let ffmpegPath = null;
 
 function send(channel, data) {
@@ -47,7 +54,7 @@ async function handleError(event) {
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
+    width: 960,
     height: 520,
     backgroundColor: '#0d0d1a',
     autoHideMenuBar: true,
@@ -91,6 +98,8 @@ function createWindow() {
           break;
       }
     });
+
+    pipelineWatcher = startPipelineWatch(send);
   });
 
   mainWindow.on('closed', () => {
@@ -149,9 +158,41 @@ app.whenReady().then(() => {
     store.clearHistory();
     lastError = null;
   });
+
+  ipcMain.handle('pipeline:list-audio', () => {
+    try {
+      const files = fs.readdirSync(PIPELINE_AUDIO_DIR)
+        .filter(f => f.toLowerCase().endsWith('.wav'));
+      return { ok: true, files };
+    } catch (err) {
+      return { ok: false, error: err.message, files: [] };
+    }
+  });
+
+  ipcMain.handle('pipeline:open-avatar-dialog', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      defaultPath: PIPELINE_AVATAR_DIR,
+      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
+      properties: ['openFile'],
+    });
+    if (result.canceled || result.filePaths.length === 0) {
+      return { ok: false };
+    }
+    return { ok: true, filePath: result.filePaths[0] };
+  });
+
+  ipcMain.handle('pipeline:submit-job', (_event, job) => {
+    try {
+      fs.writeFileSync(PIPELINE_INBOX, JSON.stringify(job, null, 2), 'utf8');
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  });
 });
 
 app.on('window-all-closed', () => {
   if (connection) connection.close();
+  if (pipelineWatcher) pipelineWatcher.close();
   app.quit();
 });
