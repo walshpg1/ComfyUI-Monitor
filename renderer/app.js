@@ -13,10 +13,6 @@ const state = {
 
 const el = id => document.getElementById(id);
 
-function getActiveWorkflowDef() {
-  return api.workflowDefs.find(d => d.id === workflowSelect.value) || api.workflowDefs[0];
-}
-
 let latestRenderPath = null;
 const connDot     = el('conn-dot');
 const connLabel   = el('conn-label');
@@ -536,6 +532,10 @@ btnAvatarBrowse.addEventListener('click', async () => {
   avatarThumb.textContent = '🖼';
   updateSubmitButton();
 });
+
+function getActiveWorkflowDef() {
+  return api.workflowDefs.find(d => d.id === workflowSelect.value) || api.workflowDefs[0];
+}
 
 workflowSelect.addEventListener('change', () => {
   const def = getActiveWorkflowDef();
