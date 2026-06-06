@@ -481,6 +481,8 @@ const submitState = {
   platform:   'tiktok',
 };
 
+const INPUT_STATES = { avatar: 'avatarPath', audio: 'audioFile' };
+
 const WORKFLOW_TIMES = {
   LTX_FFLF_Audio: '~12–15 min',
   LTX_2Stage:     '~15–20 min',
@@ -489,7 +491,11 @@ const WORKFLOW_TIMES = {
 };
 
 function updateSubmitButton() {
-  btnSubmitJob.disabled = !(submitState.avatarPath && submitState.audioFile);
+  const def = getActiveWorkflowDef();
+  const ready = def.inputs
+    .filter(i => i !== 'platform')
+    .every(i => !!submitState[INPUT_STATES[i]]);
+  btnSubmitJob.disabled = !ready;
 }
 
 async function loadAudioList(def) {
@@ -567,7 +573,11 @@ document.querySelectorAll('.platform-btn').forEach(btn => {
 });
 
 btnSubmitJob.addEventListener('click', async () => {
-  if (!submitState.avatarPath || !submitState.audioFile) return;
+  const def = getActiveWorkflowDef();
+  const requiredMet = def.inputs
+    .filter(i => i !== 'platform')
+    .every(i => !!submitState[INPUT_STATES[i]]);
+  if (!requiredMet) return;
   btnSubmitJob.disabled = true;
 
   const job = {
