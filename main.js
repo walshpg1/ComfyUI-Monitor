@@ -18,8 +18,6 @@ const { startPipelineWatch } = require('./pipeline');
 const WS_URL   = process.env.COMFYUI_WS_URL || 'ws://127.0.0.1:8188/ws';
 const API_KEY  = process.env.ANTHROPIC_API_KEY || null;
 
-const PIPELINE_AUDIO_DIR = 'D:\\AIStudio\\Pipeline\\staging\\audio_ready';
-const PIPELINE_AVATAR_DIR = 'D:\\AIStudio\\Pipeline\\assets\\avatars';
 const PIPELINE_INBOX      = 'D:\\AIStudio\\Pipeline\\inbox\\job.json';
 
 let mainWindow;

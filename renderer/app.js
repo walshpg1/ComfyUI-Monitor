@@ -488,13 +488,6 @@ const submitState = {
 
 const INPUT_STATES = { avatar: 'avatarPath', audio: 'audioFile' };
 
-const WORKFLOW_TIMES = {
-  LTX_FFLF_Audio: '~12–15 min',
-  LTX_2Stage:     '~15–20 min',
-  LTX_3Stage:     '~20–25 min',
-  FLOAT:          '~10–12 min',
-};
-
 function updateSubmitButton() {
   const def = getActiveWorkflowDef();
   const ready = def.inputs
