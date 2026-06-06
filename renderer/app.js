@@ -8,7 +8,8 @@ const state = {
   stage: 1,
   prevStagePct: 0,
   stage2Start: null,
-  errorCards: new Map()
+  errorCards: new Map(),
+  activeWorkflowDef: null,
 };
 
 const el = id => document.getElementById(id);
@@ -246,7 +247,9 @@ api.onEvent((channel, data) => {
       break;
 
     case 'comfyui:run-start':
-      workflowName.textContent = data.workflowName || 'Unknown workflow';
+      workflowName.textContent = state.activeWorkflowDef
+        ? state.activeWorkflowDef.label
+        : (data.workflowName || 'Unknown workflow');
       stage1Label.textContent = 'Starting...';
       stage1Bar.style.width = '0%';
       stage1Pct.textContent = '0%';
@@ -264,11 +267,12 @@ api.onEvent((channel, data) => {
       setJobCardProgress(0);
       break;
 
-    case 'comfyui:progress':
-      // Detect stage 2: step resets to a low number after stage 1 was well advanced
-      if (data.step <= 2 && state.stage === 1 && state.prevStagePct > 80) {
+    case 'comfyui:progress': {
+      const allowTwoStage = state.activeWorkflowDef ? state.activeWorkflowDef.twoStage : true;
+      if (allowTwoStage && data.step <= 2 && state.stage === 1 && state.prevStagePct > 80) {
         state.stage = 2;
         state.stage2Start = Date.now();
+        el('stage2-label').textContent = state.activeWorkflowDef?.stages[1] ?? 'Processing';
       }
       if (state.stage === 2) {
         updateStage2(data.step, data.total);
@@ -277,6 +281,7 @@ api.onEvent((channel, data) => {
       }
       setJobCardProgress(data.total > 0 ? Math.round(data.step / data.total * 100) : 0);
       break;
+    }
 
     case 'comfyui:run-complete':
       setStatus('Idle', 'idle');
@@ -591,6 +596,7 @@ btnSubmitJob.addEventListener('click', async () => {
   btnSubmitJob.disabled = false;
 
   if (result.ok) {
+    state.activeWorkflowDef = getActiveWorkflowDef();
     toastIcon.textContent = '✓';
     toastMsg.textContent = 'Job queued — n8n will pick it up within 10 seconds';
     submitToast.className = 'submit-toast';
