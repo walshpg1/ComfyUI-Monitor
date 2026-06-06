@@ -473,6 +473,7 @@ api.workflowDefs.forEach(def => {
   workflowSelect.appendChild(opt);
 });
 workflowHint.textContent = api.workflowDefs[0]?.estimatedTime ?? '';
+applyWorkflowInputs(api.workflowDefs[0] || { inputs: [] });
 
 const submitState = {
   avatarPath: null,
@@ -538,9 +539,16 @@ function getActiveWorkflowDef() {
   return api.workflowDefs.find(d => d.id === workflowSelect.value) || api.workflowDefs[0];
 }
 
+function applyWorkflowInputs(def) {
+  document.querySelectorAll('[data-input-section]').forEach(section => {
+    section.hidden = !def.inputs.includes(section.dataset.inputSection);
+  });
+}
+
 workflowSelect.addEventListener('change', () => {
   const def = getActiveWorkflowDef();
   workflowHint.textContent = def.estimatedTime;
+  applyWorkflowInputs(def);
   submitState.avatarPath = null;
   submitState.audioFile = null;
   avatarFilename.textContent = 'No file selected';
