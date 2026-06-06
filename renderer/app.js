@@ -354,7 +354,7 @@ function showTab(name) {
   tabTools.className   = `tab-btn${isTools   ? ' tab-btn--active' : ''}`;
   tabJobs.className    = `tab-btn${isJobs    ? ' tab-btn--active' : ''}`;
   tabSubmit.className  = `tab-btn${isSubmit  ? ' tab-btn--active' : ''}`;
-  if (isSubmit) loadAudioList().catch(err => {
+  if (isSubmit) loadAudioList(getActiveWorkflowDef()).catch(err => {
     audioList.innerHTML = '';
     const div = document.createElement('div');
     div.className = 'audio-empty';
@@ -491,19 +491,19 @@ function updateSubmitButton() {
   btnSubmitJob.disabled = !(submitState.avatarPath && submitState.audioFile);
 }
 
-async function loadAudioList() {
+async function loadAudioList(def) {
   audioList.innerHTML = '<div class="audio-empty">Loading…</div>';
   submitState.audioFile = null;
   updateSubmitButton();
 
-  const result = await api.listAudio();
+  const result = await api.listAudio(def.audioDir, def.audioExtensions);
   audioList.innerHTML = '';
 
   if (!result.ok || result.files.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'audio-empty';
     empty.textContent = result.ok
-      ? 'No .wav files in staging\\audio_ready\\'
+      ? `No ${def.audioExtensions.join('/')} files found`
       : `Error: ${result.error}`;
     audioList.appendChild(empty);
     return;
@@ -525,7 +525,8 @@ async function loadAudioList() {
 }
 
 btnAvatarBrowse.addEventListener('click', async () => {
-  const result = await api.openAvatarDialog();
+  const def = getActiveWorkflowDef();
+  const result = await api.openAvatarDialog(def.avatarDir, def.avatarExtensions);
   if (!result.ok) return;
   submitState.avatarPath = result.filePath;
   avatarFilename.textContent = result.filePath.split('\\').pop();
@@ -540,6 +541,12 @@ function getActiveWorkflowDef() {
 workflowSelect.addEventListener('change', () => {
   const def = getActiveWorkflowDef();
   workflowHint.textContent = def.estimatedTime;
+  submitState.avatarPath = null;
+  submitState.audioFile = null;
+  avatarFilename.textContent = 'No file selected';
+  avatarThumb.textContent = '👤';
+  loadAudioList(def).catch(() => {});
+  updateSubmitButton();
 });
 
 document.querySelectorAll('.platform-btn').forEach(btn => {

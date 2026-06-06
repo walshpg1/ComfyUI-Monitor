@@ -159,20 +159,20 @@ app.whenReady().then(() => {
     lastError = null;
   });
 
-  ipcMain.handle('pipeline:list-audio', () => {
+  ipcMain.handle('pipeline:list-audio', (_event, { dir, extensions }) => {
     try {
-      const files = fs.readdirSync(PIPELINE_AUDIO_DIR)
-        .filter(f => f.toLowerCase().endsWith('.wav'));
+      const files = fs.readdirSync(dir)
+        .filter(f => extensions.some(ext => f.toLowerCase().endsWith('.' + ext)));
       return { ok: true, files };
     } catch (err) {
       return { ok: false, error: err.message, files: [] };
     }
   });
 
-  ipcMain.handle('pipeline:open-avatar-dialog', async () => {
+  ipcMain.handle('pipeline:open-avatar-dialog', async (_event, { dir, extensions }) => {
     const result = await dialog.showOpenDialog(mainWindow, {
-      defaultPath: PIPELINE_AVATAR_DIR,
-      filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg'] }],
+      defaultPath: dir,
+      filters: [{ name: 'Images', extensions }],
       properties: ['openFile'],
     });
     if (result.canceled || result.filePaths.length === 0) {

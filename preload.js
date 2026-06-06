@@ -24,7 +24,7 @@ contextBridge.exposeInMainWorld('comfyMonitor', {
   copyError:        () => ipcRenderer.invoke('copy-last-error'),
   clearHistory:     () => ipcRenderer.invoke('clear-history'),
   runTool:          (tool, args) => ipcRenderer.invoke('tools:run', { tool, args }),
-  listAudio:        ()           => ipcRenderer.invoke('pipeline:list-audio'),
-  openAvatarDialog: ()           => ipcRenderer.invoke('pipeline:open-avatar-dialog'),
+  listAudio:        (dir, extensions) => ipcRenderer.invoke('pipeline:list-audio', { dir, extensions }),
+  openAvatarDialog: (dir, extensions) => ipcRenderer.invoke('pipeline:open-avatar-dialog', { dir, extensions }),
   submitJob:        (job)        => ipcRenderer.invoke('pipeline:submit-job', job),
 });
