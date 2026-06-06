@@ -29,6 +29,8 @@
   <div id="job-processing-list"><div class="sidebar-empty">No active jobs</div></div>
   <div class="sidebar-heading sidebar-heading--secondary">Recently Completed</div>
   <div id="job-completed-list"></div>
+  <div class="sidebar-heading sidebar-heading--failed">Failed</div>
+  <div id="job-failed-list"></div>
 </aside>
 <div id="monitor-main">
     <section id="stats-row">
@@ -110,7 +112,7 @@
     <div id="jobs-panel-processing"><div class="sidebar-empty">No active jobs</div></div>
     <div class="sidebar-heading sidebar-heading--secondary">Completed</div>
     <div id="jobs-panel-completed"></div>
-    <div class="sidebar-heading sidebar-heading--secondary">Failed</div>
+    <div class="sidebar-heading sidebar-heading--failed">Failed</div>
     <div id="jobs-panel-failed"></div>
   </div>
 </div>
@@ -143,12 +145,7 @@
       <div class="submit-row">
         <div class="submit-section submit-section--flex">
           <div class="submit-label">WORKFLOW</div>
-          <select id="workflow-select" class="workflow-select">
-            <option value="LTX_FFLF_Audio">LTX_FFLF_Audio</option>
-            <option value="LTX_2Stage">LTX_2Stage</option>
-            <option value="LTX_3Stage">LTX_3Stage</option>
-            <option value="FLOAT">FLOAT</option>
-          </select>
+          <select id="workflow-select" class="workflow-select"></select>
           <span id="workflow-hint" class="submit-hint">~12–15 min</span>
         </div>
         <div class="submit-section submit-section--platform">

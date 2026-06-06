@@ -1,4 +1,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const { definitions } = require('./workflows/definitions');
 
 const CHANNELS = [
   'comfyui:connected',
@@ -14,6 +15,7 @@ const CHANNELS = [
 ];
 
 contextBridge.exposeInMainWorld('comfyMonitor', {
+  workflowDefs: definitions,
   onEvent(callback) {
     CHANNELS.forEach(ch => {
       ipcRenderer.on(ch, (_event, data) => callback(ch, data));

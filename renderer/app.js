@@ -12,6 +12,11 @@ const state = {
 };
 
 const el = id => document.getElementById(id);
+
+function getActiveWorkflowDef() {
+  return api.workflowDefs.find(d => d.id === workflowSelect.value) || api.workflowDefs[0];
+}
+
 let latestRenderPath = null;
 const connDot     = el('conn-dot');
 const connLabel   = el('conn-label');
@@ -36,6 +41,7 @@ const cardTpl     = el('error-card-tpl');
 
 const jobProcessingList  = el('job-processing-list');
 const jobCompletedList   = el('job-completed-list');
+const jobFailedList      = el('job-failed-list');
 const renderEmpty        = el('render-empty');
 const renderRow          = el('render-row');
 const renderFilename     = el('render-filename');
@@ -191,17 +197,32 @@ function renderList(container, jobs, statusClass, statusLabel, showBar, emptyMsg
   }
 }
 
+function setJobCardProgress(pct) {
+  const containers = [jobProcessingList, el('jobs-panel-processing')];
+  for (const c of containers) {
+    if (!c) continue;
+    for (const fill of c.querySelectorAll('.job-card-bar-fill')) {
+      fill.style.width = pct + '%';
+    }
+  }
+}
+
 function renderJobQueue(data) {
-  const { processing, completed } = data;
+  const { processing, completed, failed = [] } = data;
 
   renderList(jobProcessingList, processing, 'processing', '● Processing', true, 'No active jobs');
   renderList(jobCompletedList, completed, 'completed', '✓ Done', false, null);
+  renderList(jobFailedList, failed, 'failed', '✕ Failed', false, null);
 
   const panelProcessing = el('jobs-panel-processing');
   const panelCompleted  = el('jobs-panel-completed');
+  const panelFailed     = el('jobs-panel-failed');
   if (panelProcessing && panelCompleted) {
     renderList(panelProcessing, processing, 'processing', '● Processing', true, 'No active jobs');
     renderList(panelCompleted, completed, 'completed', '✓ Done', false, null);
+  }
+  if (panelFailed) {
+    renderList(panelFailed, failed, 'failed', '✕ Failed', false, null);
   }
 }
 
@@ -244,6 +265,7 @@ api.onEvent((channel, data) => {
       state.stage2Start = null;
       setStatus('Running', 'running');
       startElapsed();
+      setJobCardProgress(0);
       break;
 
     case 'comfyui:progress':
@@ -257,6 +279,7 @@ api.onEvent((channel, data) => {
       } else {
         updateStage1(data.step, data.total);
       }
+      setJobCardProgress(data.total > 0 ? Math.round(data.step / data.total * 100) : 0);
       break;
 
     case 'comfyui:run-complete':
@@ -270,6 +293,7 @@ api.onEvent((channel, data) => {
       statCompleted.textContent = state.completed;
       state.stage = 1;
       state.prevStagePct = 0;
+      setJobCardProgress(100);
       break;
 
     case 'comfyui:error':
@@ -445,6 +469,15 @@ const submitToast     = el('submit-toast');
 const toastMsg        = el('toast-msg');
 const toastIcon       = el('toast-icon');
 
+// Populate workflow dropdown from definitions
+api.workflowDefs.forEach(def => {
+  const opt = document.createElement('option');
+  opt.value = def.id;
+  opt.textContent = def.label;
+  workflowSelect.appendChild(opt);
+});
+workflowHint.textContent = api.workflowDefs[0]?.estimatedTime ?? '';
+
 const submitState = {
   avatarPath: null,
   audioFile:  null,
@@ -505,7 +538,8 @@ btnAvatarBrowse.addEventListener('click', async () => {
 });
 
 workflowSelect.addEventListener('change', () => {
-  workflowHint.textContent = WORKFLOW_TIMES[workflowSelect.value] || '';
+  const def = getActiveWorkflowDef();
+  workflowHint.textContent = def.estimatedTime;
 });
 
 document.querySelectorAll('.platform-btn').forEach(btn => {
