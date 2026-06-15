@@ -14,11 +14,17 @@ const {
   FFMPEG_CANDIDATES,
 } = require('./ffmpeg-tools');
 const { startPipelineWatch } = require('./pipeline');
+const { readWavDuration } = require('./wav-utils');
+const { scanClipSets, scanClipsInSet, buildMuxOutputPath, runMux } = require('./mux-engine');
 
 const WS_URL   = process.env.COMFYUI_WS_URL || 'ws://127.0.0.1:8188/ws';
 const API_KEY  = process.env.ANTHROPIC_API_KEY || null;
 
-const PIPELINE_INBOX      = 'D:\\AIStudio\\Pipeline\\inbox\\job.json';
+const PIPELINE_INBOX       = 'D:\\AIStudio\\Pipeline\\inbox\\job.json';
+const PIPELINE_AVATARS_DIR = 'D:\\AIStudio\\Pipeline\\assets\\avatars';
+const PIPELINE_AUDIO_DIR   = 'D:\\AIStudio\\Pipeline\\staging\\audio_ready';
+const MASTERED_AUDIO_DIR   = 'D:\\AIStudio\\Outputs\\audio\\mastered';
+const MUXED_OUTPUT_DIR     = 'D:\\AIStudio\\Outputs\\video\\muxed';
 
 let mainWindow;
 let lastError  = null;
@@ -59,7 +65,8 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      sandbox: false
     }
   });
 
@@ -160,7 +167,11 @@ app.whenReady().then(() => {
   ipcMain.handle('pipeline:list-audio', (_event, { dir, extensions }) => {
     try {
       const files = fs.readdirSync(dir)
-        .filter(f => extensions.some(ext => f.toLowerCase().endsWith('.' + ext)));
+        .filter(f => extensions.some(ext => f.toLowerCase().endsWith('.' + ext)))
+        .map(filename => ({
+          filename,
+          duration: readWavDuration(path.join(dir, filename)),
+        }));
       return { ok: true, files };
     } catch (err) {
       return { ok: false, error: err.message, files: [] };
@@ -179,9 +190,88 @@ app.whenReady().then(() => {
     return { ok: true, filePath: result.filePaths[0] };
   });
 
+  ipcMain.handle('pipeline:get-thumbnail', async (_event, { videoPath }) => {
+    if (!ffmpegPath) return { ok: false };
+    try {
+      const result = await extractFirstFrame(ffmpegPath, videoPath);
+      const imgData = fs.readFileSync(result.path);
+      return { ok: true, dataUri: `data:image/png;base64,${imgData.toString('base64')}` };
+    } catch {
+      return { ok: false };
+    }
+  });
+
+  ipcMain.handle('pipeline:open-render', async (_event, { filePath }) => {
+    if (!fs.existsSync(filePath)) return { ok: false, error: 'File no longer exists.' };
+    try {
+      const errMsg = await shell.openPath(filePath);
+      // shell.openPath resolves to '' on success or an error string on failure
+      return errMsg ? { ok: false, error: errMsg } : { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('pipeline:reveal-render', (_event, { filePath }) => {
+    if (!fs.existsSync(filePath)) return { ok: false, error: 'File no longer exists.' };
+    try {
+      shell.showItemInFolder(filePath);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('mux:scan-clip-sets', () => {
+    try {
+      return { ok: true, clipSets: scanClipSets(MASTERED_AUDIO_DIR) };
+    } catch (err) {
+      return { ok: false, error: err.message, clipSets: [] };
+    }
+  });
+
+  ipcMain.handle('mux:scan-clips', (_event, { clipSetPath }) => {
+    try {
+      return { ok: true, clips: scanClipsInSet(clipSetPath) };
+    } catch (err) {
+      return { ok: false, error: err.message, clips: [] };
+    }
+  });
+
+  ipcMain.handle('mux:run', async (_event, { videoPath, audioPath }) => {
+    if (!ffmpegPath) return { ok: false, error: 'ffmpeg not found.' };
+    if (!fs.existsSync(videoPath)) return { ok: false, error: 'Video file no longer exists.' };
+    if (!fs.existsSync(audioPath)) return { ok: false, error: 'Audio clip no longer exists.' };
+    try {
+      fs.mkdirSync(MUXED_OUTPUT_DIR, { recursive: true });
+      const videoStem  = path.basename(videoPath, path.extname(videoPath));
+      const audioStem  = path.basename(audioPath, path.extname(audioPath));
+      const outputPath = buildMuxOutputPath(MUXED_OUTPUT_DIR, videoStem, audioStem);
+      await runMux(ffmpegPath, videoPath, audioPath, outputPath);
+      return { ok: true, outputPath };
+    } catch (err) {
+      return { ok: false, error: err.message };
+    }
+  });
+
   ipcMain.handle('pipeline:submit-job', (_event, job) => {
     try {
-      fs.writeFileSync(PIPELINE_INBOX, JSON.stringify(job, null, 2), 'utf8');
+      const { avatarPath, ...jobFields } = job;
+
+      // Pre-copy avatar to canonical avatars folder so n8n can always find it
+      if (avatarPath) {
+        const destAvatar = path.join(PIPELINE_AVATARS_DIR, jobFields.avatar);
+        if (path.resolve(avatarPath) !== path.resolve(destAvatar)) {
+          fs.copyFileSync(avatarPath, destAvatar);
+        }
+      }
+
+      // Compute WAV duration and include it so n8n can patch LoadAudioUI correctly
+      const audioFile = path.join(PIPELINE_AUDIO_DIR, jobFields.audio);
+      const audioDuration = readWavDuration(audioFile);
+
+      const jobJson = { ...jobFields, ...(audioDuration !== null ? { audioDuration } : {}) };
+      fs.writeFileSync(PIPELINE_INBOX, JSON.stringify(jobJson, null, 2), 'utf8');
       return { ok: true };
     } catch (err) {
       return { ok: false, error: err.message };

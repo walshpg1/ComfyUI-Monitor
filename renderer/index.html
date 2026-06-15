@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:">
   <title>ComfyUI Monitor</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -19,6 +19,7 @@
       <button id="tab-tools" class="tab-btn">Tools</button>
       <button id="tab-jobs" class="tab-btn">Jobs</button>
       <button id="tab-submit" class="tab-btn">Submit</button>
+      <button id="tab-mux" class="tab-btn">Mux</button>
     </div>
   </header>
 
@@ -58,7 +59,7 @@
         <div id="workflow-name" class="workflow-name">—</div>
         <div id="stage1-label" class="stage-label">Idle</div>
         <div class="progress-track">
-          <div id="stage1-bar" class="progress-bar" style="width:0%"></div>
+          <div id="stage1-bar" class="progress-bar"></div>
         </div>
         <div class="progress-meta">
           <span id="stage1-pct">0%</span>
@@ -66,9 +67,9 @@
         </div>
 
         <div id="stage2-section" class="stage2-section stage2-section--waiting">
-          <div class="panel-title" style="margin-top:14px;">Stage 2 (<span id="stage2-label">Upscale</span>)</div>
+          <div class="panel-title panel-title--stage2">Stage 2 (<span id="stage2-label">Upscale</span>)</div>
           <div class="progress-track">
-            <div id="stage2-bar" class="progress-bar progress-bar--dim" style="width:0%"></div>
+            <div id="stage2-bar" class="progress-bar progress-bar--dim"></div>
           </div>
           <div id="stage2-meta" class="progress-meta">
             <span id="stage2-pct">Waiting...</span>
@@ -93,6 +94,9 @@
           <div id="render-meta" class="render-meta"></div>
         </div>
         <div class="render-actions">
+          <button id="btn-open-render"   class="btn-render-open" disabled>&#9654; Open</button>
+          <button id="btn-reveal-render" class="btn-render-open" disabled>&#128193; Folder</button>
+          <span class="render-actions-sep"></span>
           <button class="btn-render-tool" data-tool="reverse">Reverse</button>
           <button class="btn-render-tool" data-tool="boomerang">Boomerang</button>
           <button class="btn-render-tool" data-tool="to-gif">GIF</button>
@@ -136,7 +140,7 @@
       </div>
 
       <div class="submit-section" data-input-section="audio">
-        <div class="submit-label">AUDIO <span class="submit-hint" style="display:inline">— staging\audio_ready\</span></div>
+        <div class="submit-label">AUDIO <span class="submit-hint submit-hint--inline">— staging\audio_ready\</span></div>
         <div id="audio-list" class="audio-list">
           <div class="audio-empty">Loading…</div>
         </div>
@@ -280,6 +284,63 @@
       </div>
     </div>
   </template>
+
+  <div id="mux-panel" hidden>
+    <div class="mux-content">
+
+      <!-- Status banner -->
+      <div class="mux-status-banner mux-status-banner--waiting" id="mux-status-banner">
+        <span class="mux-status-icon"  id="mux-status-icon">&#9888;</span>
+        <span class="mux-status-label" id="mux-status-label">Waiting for Render</span>
+      </div>
+
+      <!-- Video section -->
+      <div class="mux-section">
+        <div class="mux-section-label">VIDEO</div>
+        <div class="mux-video-row">
+          <div class="mux-video-info">
+            <div class="mux-file-name" id="mux-render-name">No render detected</div>
+            <div class="mux-file-dur"  id="mux-render-duration">—</div>
+          </div>
+          <div class="mux-inline-actions">
+            <button id="mux-btn-open-video"   class="btn-mux-action" disabled>&#9654; Open</button>
+            <button id="mux-btn-reveal-video" class="btn-mux-action" disabled>&#128193; Folder</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio clip section -->
+      <div class="mux-section">
+        <div class="mux-section-label">AUDIO CLIP SET</div>
+        <select id="mux-clip-set-select" class="mux-select">
+          <option value="">— Scanning… —</option>
+        </select>
+        <div id="mux-clip-list" class="mux-clip-list">
+          <div class="mux-clip-empty">Select a clip set above</div>
+        </div>
+      </div>
+
+      <!-- Duration warning -->
+      <div id="mux-duration-warning" class="mux-duration-warning" hidden></div>
+
+      <!-- Mux button -->
+      <button id="btn-mux-now" class="btn-mux" disabled>&#9654; Mux Now</button>
+
+      <!-- Post-mux result -->
+      <div id="mux-result" class="mux-result" hidden>
+        <div class="mux-result-label">&#10003; Muxed output:</div>
+        <div id="mux-result-path" class="mux-result-path"></div>
+        <div class="mux-inline-actions mux-inline-actions--spaced">
+          <button id="mux-btn-open-output"   class="btn-mux-action">&#9654; Open</button>
+          <button id="mux-btn-reveal-output" class="btn-mux-action">&#128193; Folder</button>
+        </div>
+      </div>
+
+      <!-- Error / hint text -->
+      <div id="mux-hint" class="mux-hint"></div>
+
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
