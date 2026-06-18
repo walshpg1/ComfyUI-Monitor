@@ -1051,6 +1051,11 @@ body {
   margin-bottom: 12px;
   border: 1px solid;
 }
+.mux-duration-warning--ok {
+  background: #0b2a14;
+  border-color: #238636;
+  color: #3fb950;
+}
 .mux-duration-warning--yellow {
   background: #271d00;
   border-color: #9a6700;
